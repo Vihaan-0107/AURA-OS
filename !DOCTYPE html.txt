@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA OS — Classic Monochrome Edition</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for Radar & Telemetry Visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Classic Black & White Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid #000000;
+            cursor: pointer;
+            margin-top: -5px;
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+            transition: transform 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.18);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 5px;
+            cursor: pointer;
+            background: #262626;
+            border-radius: 999px;
+        }
+        /* Smooth circular gauge transition */
+        .gauge-circle {
+            transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s ease;
+        }
+        /* Subtle custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333333;
+            border-radius: 999px;
+        }
+        /* Nike-Style Kinetic Intro Animations */
+        @keyframes nikeSlam {
+            0% {
+                opacity: 0;
+                transform: translateY(115%) skewY(3deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) skewY(0deg);
+            }
+        }
+        @keyframes lineExpand {
+            0% {
+                transform: scaleX(0);
+            }
+            100% {
+                transform: scaleX(1);
+            }
+        }
+        .nike-reveal-1 {
+            opacity: 0;
+            animation: nikeSlam 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+        }
+        .nike-reveal-2 {
+            opacity: 0;
+            animation: nikeSlam 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.35s forwards;
+        }
+        .nike-reveal-3 {
+            opacity: 0;
+            animation: nikeSlam 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.55s forwards;
+        }
+        .nike-fade-up {
+            opacity: 0;
+            animation: nikeSlam 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards;
+        }
+        .nike-divider {
+            transform: scaleX(0);
+            transform-origin: left;
+            animation: lineExpand 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.65s forwards;
+        }
+        /* Converging Words Intro Animation */
+        @keyframes convergeLeft {
+            0% {
+                opacity: 0;
+                transform: translateX(-75px) scale(1.08);
+                letter-spacing: 0.16em;
+            }
+            70% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+                letter-spacing: -0.04em;
+            }
+        }
+        @keyframes convergeRight {
+            0% {
+                opacity: 0;
+                transform: translateX(75px) scale(1.08);
+                letter-spacing: 0.16em;
+            }
+            70% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+                letter-spacing: -0.04em;
+            }
+        }
+        @keyframes convergeCenter {
+            0% {
+                opacity: 0;
+                transform: translateY(36px) scale(1.22);
+                letter-spacing: 0.22em;
+            }
+            70% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                letter-spacing: -0.04em;
+            }
+        }
+        @keyframes wordByWordPop {
+            0% {
+                opacity: 0;
+                transform: translateY(22px) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .word-seq {
+            display: inline-block;
+            opacity: 0;
+            animation: wordByWordPop 0.42s cubic-bezier(0.16, 1, 0.3, 1) var(--word-delay, 0s) forwards;
+        }
+        .word-converge-left {
+            display: inline-block;
+            opacity: 0;
+            animation: convergeLeft 0.72s cubic-bezier(0.16, 1, 0.3, 1) 0.12s forwards;
+        }
+        .word-converge-right {
+            display: inline-block;
+            opacity: 0;
+            animation: convergeRight 0.72s cubic-bezier(0.16, 1, 0.3, 1) 0.28s forwards;
+        }
+        .word-converge-center {
+            display: inline-block;
+            opacity: 0;
+            animation: convergeCenter 0.78s cubic-bezier(0.16, 1, 0.3, 1) 0.44s forwards;
+        }
+    </style>
+</head>
+<body class="bg-black text-neutral-100 font-sans antialiased min-h-screen flex flex-col selection:bg-white selection:text-black relative overflow-x-hidden">
+
+    <!-- NIKE-STYLE CINEMATIC KINETIC INTRO OVERLAY WITH WORD-BY-WORD REVEAL -->
+    <div id="nikeIntroOverlay" class="fixed inset-0 z-50 bg-black flex flex-col justify-between p-6 sm:p-12 transition-all duration-700 ease-in-out">
+        <!-- Top Bar inside Intro -->
+        <div class="flex items-center justify-between border-b border-neutral-800 pb-4">
+            <div class="flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 bg-white inline-block"></span>
+                <span class="font-mono text-xs uppercase tracking-[0.25em] text-neutral-300">AURA OS // WEBSITE INTRO</span>
+            </div>
+            <button onclick="dismissIntro()" class="font-mono text-xs uppercase tracking-widest text-neutral-400 hover:text-white transition">
+                Skip Intro [ESC] →
+            </button>
+        </div>
+
+        <!-- Center Word-by-Word Website Intro -->
+        <div class="max-w-5xl my-auto py-8">
+            <p class="font-mono text-xs sm:text-sm uppercase tracking-[0.25em] text-neutral-400 mb-4 flex flex-wrap gap-x-2">
+                <span class="word-seq" style="--word-delay: 0.08s;">WELCOME</span>
+                <span class="word-seq" style="--word-delay: 0.16s;">TO</span>
+                <span class="word-seq text-white" style="--word-delay: 0.24s;">AURA</span>
+                <span class="word-seq text-white" style="--word-delay: 0.32s;">OS</span>
+                <span class="word-seq" style="--word-delay: 0.40s;">—</span>
+                <span class="word-seq" style="--word-delay: 0.48s;">YOUR</span>
+                <span class="word-seq" style="--word-delay: 0.56s;">LIFE</span>
+                <span class="word-seq" style="--word-delay: 0.64s;">&amp;</span>
+                <span class="word-seq" style="--word-delay: 0.72s;">FOCUS</span>
+                <span class="word-seq" style="--word-delay: 0.80s;">MONITOR</span>
+            </p>
+            <div class="overflow-hidden">
+                <h1 class="text-5xl sm:text-7xl md:text-8xl font-black uppercase tracking-tighter leading-[0.94] text-white flex flex-wrap gap-x-4 sm:gap-x-6">
+                    <span class="word-seq" style="--word-delay: 0.92s;">WATCH</span>
+                    <span class="word-seq" style="--word-delay: 1.08s;">EVERY</span>
+                    <span class="word-seq" style="--word-delay: 1.24s;">HABIT.</span>
+                </h1>
+            </div>
+            <div class="overflow-hidden mt-1 sm:mt-2">
+                <h1 class="text-5xl sm:text-7xl md:text-8xl font-black uppercase tracking-tighter leading-[0.94] text-neutral-400 flex flex-wrap gap-x-4 sm:gap-x-6">
+                    <span class="word-seq" style="--word-delay: 1.40s;">FIX</span>
+                    <span class="word-seq" style="--word-delay: 1.56s;">EVERY</span>
+                    <span class="word-seq text-white" style="--word-delay: 1.72s;">LEAK.</span>
+                </h1>
+            </div>
+            <div class="overflow-hidden mt-1 sm:mt-2">
+                <h1 class="text-5xl sm:text-7xl md:text-8xl font-black uppercase tracking-tighter leading-[0.94] text-white italic flex flex-wrap gap-x-4 sm:gap-x-6">
+                    <span class="word-seq" style="--word-delay: 1.88s;">STAY</span>
+                    <span class="word-seq" style="--word-delay: 2.04s;">FOCUSED.</span>
+                </h1>
+            </div>
+
+            <div class="nike-divider h-[2px] w-full bg-white my-6 sm:my-8"></div>
+
+            <div class="nike-fade-up flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <p class="text-sm sm:text-base text-neutral-300 max-w-xl font-medium leading-relaxed">
+                    AURA OS monitors what you do across deep work, screen time, sleep, and habits—then gives clear advice and upgrades so you can stay locked in.
+                </p>
+                <button onclick="dismissIntro()" class="group relative inline-flex items-center justify-center px-8 py-4 bg-white text-black font-black uppercase tracking-wider text-sm rounded-full hover:bg-neutral-200 transition active:scale-95 shrink-0 shadow-[0_0_30px_rgba(255,255,255,0.25)]">
+                    <span>Start Monitoring</span>
+                    <svg class="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bottom Telemetry Ticker Strip -->
+        <div class="flex flex-wrap items-center justify-between gap-4 border-t border-neutral-800 pt-4 font-mono text-[11px] uppercase tracking-widest text-neutral-500">
+            <span>01 INTRO → 02 USER INPUT → 03 OUTCOME → 04 LIFE UPGRADES</span>
+            <span class="text-white">AURA OS READY</span>
+        </div>
+    </div>
+
+    <!-- Twinkling Starfield Canvas Background -->
+    <canvas id="starfieldCanvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-30 bg-black/80 backdrop-blur-md border-b border-neutral-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-white text-black flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.25)]">
+                    <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="font-extrabold text-lg tracking-tight text-white">AURA <span class="text-neutral-400 font-light">OS</span></span>
+                    <span class="hidden sm:inline-block ml-2 text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-white/5 text-neutral-300 border border-neutral-700">NOIR TELEMETRY</span>
+                </div>
+            </div>
+
+            <!-- Live Streak & Hackathon Demo Preset Buttons -->
+            <div class="flex items-center gap-2">
+                <button onclick="replayIntro()" title="Replay Intro Screen" class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-mono rounded-lg bg-black text-neutral-400 border border-neutral-800 hover:border-white hover:text-white transition">
+                    <span>▶ Intro</span>
+                </button>
+                <div class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-950 border border-neutral-800 mr-2">
+                    <span class="text-xs text-white">✦</span>
+                    <span class="text-xs font-mono font-semibold text-neutral-200" id="streakBadge">3-Day Focus Streak</span>
+                </div>
+                <span class="hidden md:inline text-xs text-neutral-500 mr-1">Profiles:</span>
+                <button onclick="loadPreset('distracted')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-neutral-950 text-neutral-400 border border-neutral-800 hover:border-white hover:text-white transition">
+                    Burnout Student
+                </button>
+                <button onclick="loadPreset('average')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-neutral-950 text-neutral-300 border border-neutral-800 hover:border-white hover:text-white transition">
+                    Average Day
+                </button>
+                <button onclick="loadPreset('lockedIn')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-black border border-white hover:bg-neutral-200 transition">
+                    Peak Focus
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- STAGE FLOW BAR: 01 Intro -> 02 Input -> 03 Outcome -> 04 Life Upgrades -->
+    <div id="stageNavBar" class="relative z-20 bg-neutral-950/90 border-b border-neutral-800/90 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto">
+                <button type="button" onclick="replayIntro()" class="px-3 py-1.5 rounded-lg text-xs font-mono border border-neutral-800 bg-black text-neutral-400 hover:text-white hover:border-neutral-600 transition shrink-0">
+                    01 / INTRO
+                </button>
+                <span class="text-neutral-700 font-mono text-xs">→</span>
+                <button type="button" id="stageTab-input" onclick="switchStage('input')" class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold border border-white bg-white text-black transition shrink-0">
+                    02 / USER INPUT
+                </button>
+                <span class="text-neutral-700 font-mono text-xs">→</span>
+                <button type="button" id="stageTab-outcome" onclick="switchStage('outcome')" class="px-3 py-1.5 rounded-lg text-xs font-mono border border-neutral-800 bg-black text-neutral-400 hover:text-white hover:border-neutral-600 transition shrink-0">
+                    03 / OUTCOME
+                </button>
+                <span class="text-neutral-700 font-mono text-xs">→</span>
+                <button type="button" id="stageTab-upgrades" onclick="switchStage('upgrades')" class="px-3 py-1.5 rounded-lg text-xs font-mono border border-neutral-800 bg-black text-neutral-400 hover:text-white hover:border-neutral-600 transition shrink-0">
+                    04 / LIFE UPGRADES
+                </button>
+            </div>
+            <div id="stageSubtitle" class="hidden md:block text-xs font-mono text-neutral-400">
+                STEP 02: Log daily habits, distractions &amp; focus goal
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Banner (Replaces alert()) -->
+    <div id="toastBanner" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-neutral-950 border border-neutral-700 text-white px-4 py-3 rounded-xl shadow-[0_0_25px_rgba(255,255,255,0.12)] flex items-center gap-3">
+            <span id="toastIcon" class="w-2 h-2 rounded-full bg-white"></span>
+            <p id="toastMessage" class="text-sm font-medium">Profile loaded</p>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Container -->
+    <main class="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+        <!-- STAGE 02: USER INPUT INTERFACE -->
+        <section id="stage-input" class="max-w-4xl mx-auto">
+            <div class="bg-neutral-950/85 backdrop-blur-md border border-neutral-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-800 pb-5 mb-6">
+                    <div>
+                        <span class="font-mono text-[11px] uppercase tracking-widest text-neutral-400">STAGE 02 // TELEMETRY CAPTURE</span>
+                        <h2 class="text-2xl font-extrabold text-white tracking-tight mt-0.5">Input Your Daily Life Data</h2>
+                        <p class="text-xs sm:text-sm text-neutral-400 mt-1">Set your hours, record live events, and define what you need to stay focused on.</p>
+                    </div>
+                    <span class="text-xs font-mono text-neutral-300 bg-black border border-neutral-800 px-3 py-1.5 rounded-lg self-start">24h Input Matrix</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Pillar 1: Deep Work / Study -->
+                    <div class="bg-black/75 p-4 rounded-xl border border-neutral-800">
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="deepWorkInput" class="text-sm font-semibold text-white flex items-center gap-2">
+                                <span>◎ Deep Work &amp; Study</span>
+                            </label>
+                            <span id="deepWorkVal" class="font-mono text-xs font-bold text-black bg-white px-2.5 py-0.5 rounded">4.0 hrs</span>
+                        </div>
+                        <input type="range" id="deepWorkInput" min="0" max="12" step="0.5" value="4.0" class="w-full">
+                        <div class="flex justify-between text-[11px] text-neutral-500 mt-1">
+                            <span>0h</span>
+                            <span>Target: 5–6h</span>
+                            <span>12h</span>
+                        </div>
+                    </div>
+
+                    <!-- Pillar 2: Digital Distractions -->
+                    <div class="bg-black/75 p-4 rounded-xl border border-neutral-800">
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="distractionInput" class="text-sm font-semibold text-neutral-200 flex items-center gap-2">
+                                <span>⊘ Social Media &amp; Scrolling</span>
+                            </label>
+                            <span id="distractionVal" class="font-mono text-xs font-bold text-white bg-neutral-900 border border-neutral-700 px-2.5 py-0.5 rounded">3.5 hrs</span>
+                        </div>
+                        <input type="range" id="distractionInput" min="0" max="10" step="0.5" value="3.5" class="w-full">
+                        <div class="flex justify-between text-[11px] text-neutral-500 mt-1">
+                            <span>0h</span>
+                            <span>Limit: &lt; 1.5h</span>
+                            <span>10h</span>
+                        </div>
+                    </div>
+
+                    <!-- Pillar 3: Sleep & Recovery -->
+                    <div class="bg-black/75 p-4 rounded-xl border border-neutral-800">
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="sleepInput" class="text-sm font-semibold text-neutral-200 flex items-center gap-2">
+                                <span>☾ Sleep &amp; Recovery</span>
+                            </label>
+                            <span id="sleepVal" class="font-mono text-xs font-bold text-white bg-neutral-900 border border-neutral-700 px-2.5 py-0.5 rounded">6.5 hrs</span>
+                        </div>
+                        <input type="range" id="sleepInput" min="3" max="11" step="0.5" value="6.5" class="w-full">
+                        <div class="flex justify-between text-[11px] text-neutral-500 mt-1">
+                            <span>3h</span>
+                            <span>Optimal: 7.5–8.5h</span>
+                            <span>11h</span>
+                        </div>
+                    </div>
+
+                    <!-- Pillar 4: Exercise & Context Switches -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-black/75 p-4 rounded-xl border border-neutral-800 flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-2">
+                                <label for="exerciseInput" class="text-xs font-semibold text-neutral-200">△ Fitness</label>
+                                <span id="exerciseVal" class="font-mono text-xs font-bold text-white">30m</span>
+                            </div>
+                            <input type="range" id="exerciseInput" min="0" max="120" step="10" value="30" class="w-full">
+                            <span class="text-[10px] text-neutral-500 mt-1">Goal: 30–60m</span>
+                        </div>
+
+                        <div class="bg-black/75 p-4 rounded-xl border border-neutral-800 flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-2">
+                                <label for="switchesInput" class="text-xs font-semibold text-neutral-200">⇄ Switches</label>
+                                <span id="switchesVal" class="font-mono text-xs font-bold text-white">45/day</span>
+                            </div>
+                            <input type="range" id="switchesInput" min="5" max="120" step="5" value="45" class="w-full">
+                            <span class="text-[10px] text-neutral-500 mt-1">Goal: &lt; 25/day</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Primary Focus Goal Input -->
+                <div class="mt-4">
+                    <label for="goalInput" class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Primary Focus Goal Today</label>
+                    <input type="text" id="goalInput" value="Build hackathon MVP and prepare 3-minute pitch" placeholder="e.g., Study Data Structures, Ship SaaS landing page..."
+                        class="w-full bg-black border border-neutral-800 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-white transition">
+                </div>
+
+                <!-- Interactive 1-Click Quick Habit & Distraction Logger -->
+                <div class="mt-5">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-neutral-400">⚡ Live Event Logger (Click to Record)</span>
+                        <span id="hydrationCount" class="text-[11px] font-mono text-neutral-300">◈ 4/8 glasses</span>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        <button type="button" onclick="logQuickEvent('sprint')" class="p-2.5 rounded-xl bg-black hover:bg-neutral-900 border border-neutral-700 hover:border-white text-white text-xs font-semibold transition active:scale-95">
+                            +30m Deep Work
+                        </button>
+                        <button type="button" onclick="logQuickEvent('scroll')" class="p-2.5 rounded-xl bg-black hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-400 text-neutral-400 hover:text-white text-xs font-medium transition active:scale-95">
+                            +30m Scrolling
+                        </button>
+                        <button type="button" onclick="logQuickEvent('water')" class="p-2.5 rounded-xl bg-black hover:bg-neutral-900 border border-neutral-700 hover:border-white text-neutral-200 text-xs font-medium transition active:scale-95">
+                            +1 Water Glass
+                        </button>
+                        <button type="button" onclick="logQuickEvent('switch')" class="p-2.5 rounded-xl bg-black hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-400 text-neutral-400 hover:text-white text-xs font-medium transition active:scale-95">
+                            +5 App Switches
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Activity Stream Feed -->
+                <div class="mt-5 bg-black/80 border border-neutral-800 rounded-xl p-3.5">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Live Telemetry Stream</span>
+                        <span class="text-[10px] font-mono text-neutral-300 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span> Tab Guard Active
+                        </span>
+                    </div>
+                    <ul id="activityFeedList" class="space-y-1.5 max-h-28 overflow-y-auto text-xs font-mono pr-1">
+                        <li class="text-neutral-300 flex justify-between"><span>[09:00] Logged 4.0h morning coding block</span><span class="text-white">+Focus</span></li>
+                        <li class="text-neutral-500 flex justify-between"><span>[13:15] Detected social feed scroll session</span><span class="text-neutral-400">-Focus</span></li>
+                        <li class="text-neutral-300 flex justify-between"><span>[16:00] 30m brisk walk &amp; hydration reset</span><span class="text-white">+Energy</span></li>
+                    </ul>
+                </div>
+
+                <!-- Stage Navigation & AI Outcome Trigger -->
+                <div class="mt-6 pt-5 border-t border-neutral-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div class="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-2.5">
+                        <button type="button" onclick="replayIntro()" class="w-full sm:w-auto px-4 py-3 rounded-xl bg-black hover:bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800 hover:border-neutral-600 text-xs font-mono font-bold uppercase tracking-wider transition">
+                            ← Intro
+                        </button>
+                        <button type="button" onclick="switchStage('outcome')" class="w-full sm:w-auto px-5 py-3 rounded-xl bg-black hover:bg-neutral-900 text-neutral-200 border border-neutral-700 hover:border-white text-xs font-bold uppercase tracking-wider transition">
+                            View Current Outcome →
+                        </button>
+                    </div>
+                    <button id="analyzeBtn" onclick="runAICoach()" class="w-full sm:w-auto py-3.5 px-6 rounded-xl bg-white hover:bg-neutral-200 text-black font-bold text-sm shadow-[0_0_25px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2 transition active:scale-[0.99]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                        <span>Analyze &amp; Open Outcome →</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STAGE 03: OUTCOME & TELEMETRY INTERFACE -->
+        <section id="stage-outcome" class="hidden max-w-5xl mx-auto space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-neutral-950/85 border border-neutral-800 rounded-2xl px-6 py-4 backdrop-blur-md">
+                <div>
+                    <span class="font-mono text-[11px] uppercase tracking-widest text-neutral-400">STAGE 03 // BEHAVIORAL OUTCOME</span>
+                    <h2 class="text-xl font-extrabold text-white tracking-tight">Your Focus Score, Leaks &amp; AI Diagnosis</h2>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="switchStage('input')" class="px-4 py-2 rounded-xl bg-black hover:bg-neutral-900 border border-neutral-700 text-xs font-mono text-neutral-200 transition">
+                        ← Edit Input
+                    </button>
+                    <button type="button" onclick="switchStage('upgrades')" class="px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-mono font-bold transition">
+                        Life Upgrades →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Top Row: Circular Focus Score + 5-Pillar Radar Chart -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Focus Score Gauge Card -->
+                <div class="bg-neutral-950/85 backdrop-blur-md border border-neutral-800 rounded-2xl p-6 shadow-2xl flex flex-col items-center justify-between text-center relative overflow-hidden">
+                    <div class="w-full flex justify-between items-center mb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-neutral-400">Focus Index</span>
+                        <span id="scoreBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-white border border-neutral-600">Moderate</span>
+                    </div>
+
+                    <!-- Circular SVG Progress Ring -->
+                    <div class="relative w-36 h-36 my-2 flex items-center justify-center">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="50" stroke="#1f1f1f" stroke-width="10" fill="none" />
+                            <circle id="scoreRing" class="gauge-circle" cx="60" cy="60" r="50" stroke="#ffffff" stroke-width="10" stroke-linecap="round" fill="none"
+                                stroke-dasharray="314.16" stroke-dashoffset="110" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span id="focusScoreNumber" class="text-4xl font-extrabold font-mono text-white">65</span>
+                            <span class="text-[11px] text-neutral-500 uppercase tracking-widest">/ 100</span>
+                        </div>
+                    </div>
+
+                    <!-- Biggest Focus Leak Callout -->
+                    <div class="w-full bg-black/80 border border-neutral-800 rounded-xl p-3 mt-2 text-left">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-500 block">Primary Focus Leak</span>
+                        <p id="primaryLeakText" class="text-sm font-semibold text-neutral-200 mt-0.5">Excessive Screen Distraction (3.5h)</p>
+                    </div>
+                </div>
+
+                <!-- Life Balance Radar Chart Card -->
+                <div class="bg-neutral-950/85 backdrop-blur-md border border-neutral-800 rounded-2xl p-6 shadow-2xl flex flex-col justify-between">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-neutral-400">5-Pillar Balance</span>
+                        <span class="text-[11px] text-neutral-500">Actual vs. Optimal</span>
+                    </div>
+                    <div class="relative h-52 w-full flex items-center justify-center">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Behavioral Diagnosis Panel -->
+            <div class="bg-neutral-950/85 backdrop-blur-md border border-neutral-800 rounded-2xl p-6 shadow-2xl">
+                <div class="flex items-center justify-between border-b border-neutral-800 pb-4 mb-4">
+                    <div class="flex items-center gap-2.5">
+                        <span class="px-2.5 py-1 rounded-lg bg-white text-black text-xs font-mono font-bold">GEMINI AI</span>
+                        <h3 class="text-base font-bold text-white">Outcome &amp; Behavioral Diagnosis</h3>
+                    </div>
+                    <span id="aiStatusText" class="text-xs text-neutral-400 font-mono">Ready</span>
+                </div>
+
+                <!-- Loading Skeleton -->
+                <div id="aiLoading" class="hidden space-y-3 py-6">
+                    <div class="flex items-center gap-3 text-white text-sm font-medium">
+                        <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Analyzing daily habits, sleep debt, and context switching patterns...</span>
+                    </div>
+                    <div class="h-3 bg-neutral-800 rounded-full w-3/4 animate-pulse"></div>
+                    <div class="h-3 bg-neutral-800 rounded-full w-full animate-pulse"></div>
+                </div>
+
+                <div id="aiContent">
+                    <div class="bg-black/80 border border-neutral-700 rounded-xl p-4">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-white mb-1">Root Cause Diagnosis</h4>
+                        <p id="aiDiagnosis" class="text-sm text-neutral-300 leading-relaxed">
+                            Your 4.0h of deep work is solid, but 3.5h of social media scrolling and 45 daily app switches are fragmenting your attention span. Reducing screen pickups in the morning will unlock an extra 90 minutes of flow.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STAGE 04: LIFE UPGRADES INTERFACE -->
+        <section id="stage-upgrades" class="hidden max-w-5xl mx-auto space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-neutral-950/85 border border-neutral-800 rounded-2xl px-6 py-4 backdrop-blur-md">
+                <div>
+                    <span class="font-mono text-[11px] uppercase tracking-widest text-neutral-400">STAGE 04 // ACTIONABLE LIFE UPGRADES</span>
+                    <h2 class="text-xl font-extrabold text-white tracking-tight">Upgrades You Can Apply Today to Stay Locked In</h2>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="switchStage('outcome')" class="px-4 py-2 rounded-xl bg-black hover:bg-neutral-900 border border-neutral-700 text-xs font-mono text-neutral-200 transition">
+                        ← Back to Outcome
+                    </button>
+                    <button type="button" onclick="switchStage('input')" class="px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-mono font-bold transition">
+                        New Log
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3 Actionable Fixes (Interactive Checkable Cards) -->
+            <div class="bg-neutral-950/85 backdrop-blur-md border border-neutral-800 rounded-2xl p-6 shadow-2xl">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h3 class="text-base font-bold text-white">High-Impact Habit Upgrades</h3>
+                        <p class="text-xs text-neutral-400">Check off upgrades as you commit to them — each adds +3 bonus points to your Focus Index.</p>
+                    </div>
+                    <span id="completedTasksBadge" class="text-xs font-mono text-white bg-black border border-neutral-700 px-3 py-1 rounded-lg">0/3 Completed (+0 Bonus Pts)</span>
+                </div>
+                <div id="aiTipsList" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+                    <div onclick="toggleActionCard(this, 0)" class="cursor-pointer bg-black/75 hover:bg-neutral-900 border border-neutral-800 hover:border-white p-4 rounded-xl transition select-none group">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono font-bold text-white">01 / LOCK</span>
+                            <span class="check-circle w-4 h-4 rounded-full border border-neutral-600 flex items-center justify-center text-[10px] text-transparent group-hover:border-white transition">✓</span>
+                        </div>
+                        <p class="tip-text text-xs text-neutral-300 mt-2 leading-relaxed">Enable grayscale mode and block social apps until your first 90-minute work sprint is done.</p>
+                    </div>
+                    <div onclick="toggleActionCard(this, 1)" class="cursor-pointer bg-black/75 hover:bg-neutral-900 border border-neutral-800 hover:border-white p-4 rounded-xl transition select-none group">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono font-bold text-white">02 / BATCH</span>
+                            <span class="check-circle w-4 h-4 rounded-full border border-neutral-600 flex items-center justify-center text-[10px] text-transparent group-hover:border-white transition">✓</span>
+                        </div>
+                        <p class="tip-text text-xs text-neutral-300 mt-2 leading-relaxed">Check messages only at 12:30 PM and 5:00 PM to drop app switches from 45 down to &lt;15.</p>
+                    </div>
+                    <div onclick="toggleActionCard(this, 2)" class="cursor-pointer bg-black/75 hover:bg-neutral-900 border border-neutral-800 hover:border-white p-4 rounded-xl transition select-none group">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono font-bold text-white">03 / RECOVER</span>
+                            <span class="check-circle w-4 h-4 rounded-full border border-neutral-600 flex items-center justify-center text-[10px] text-transparent group-hover:border-white transition">✓</span>
+                        </div>
+                        <p class="tip-text text-xs text-neutral-300 mt-2 leading-relaxed">Push sleep from 6.5h to 7.5h tonight by setting a hard device cutoff 45 minutes before bed.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Deep-Work Focus Timer Strip -->
+            <div class="bg-neutral-950/85 backdrop-blur-md border border-neutral-800 rounded-2xl p-5 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5">
+                    <div id="timerPulse" class="w-3 h-3 rounded-full bg-neutral-600"></div>
+                    <div>
+                        <h3 class="text-sm font-bold text-white">Active Focus Session Tracker</h3>
+                        <p class="text-xs text-neutral-400">Execute your upgraded schedule blocks and log live deep-work minutes</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <span id="timerDisplay" class="font-mono text-2xl font-bold text-white bg-black px-4 py-1.5 rounded-xl border border-neutral-800">25:00</span>
+                    <button id="timerToggleBtn" onclick="toggleTimer()" class="px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold transition">
+                        Start Focus
+                    </button>
+                    <button onclick="resetTimer()" class="px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 text-xs font-medium transition">
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- Optimized Schedule Upgrade (Interactive Time-Block Selector) -->
+            <div class="bg-neutral-950/85 backdrop-blur-md border border-neutral-800 rounded-2xl p-6 shadow-2xl">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-white">Recommended Focus Schedule Upgrade</h4>
+                    <span class="text-[11px] text-neutral-500">Click any block to load into timer</span>
+                </div>
+                <div id="aiSchedule" class="space-y-2 text-xs text-neutral-300 font-mono">
+                    <div onclick="loadScheduleBlock('08:30 – 10:30 Deep Work Sprint #1', 45)" class="cursor-pointer hover:bg-neutral-900 px-3 py-2 rounded-lg flex justify-between border-b border-neutral-800/80 transition">
+                        <span class="text-white font-semibold">08:30 – 10:30</span>
+                        <span>Deep Work Sprint #1 (Zero-Phone Zone) →</span>
+                    </div>
+                    <div onclick="loadScheduleBlock('10:30 – 11:00 Walk & Hydration Reset', 15)" class="cursor-pointer hover:bg-neutral-900 px-3 py-2 rounded-lg flex justify-between border-b border-neutral-800/80 transition">
+                        <span class="text-neutral-400 font-semibold">10:30 – 11:00</span>
+                        <span>Walk + Hydration Reset (No Screens) →</span>
+                    </div>
+                    <div onclick="loadScheduleBlock('14:00 – 16:00 Deep Work Sprint #2', 25)" class="cursor-pointer hover:bg-neutral-900 px-3 py-2 rounded-lg flex justify-between transition">
+                        <span class="text-white font-semibold">14:00 – 16:00</span>
+                        <span>Deep Work Sprint #2 + Pitch Rehearsal →</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Application Logic -->
+    <script>
+        // --- MULTI-STAGE INTERFACE CONTROLLER (INTRO -> INPUT -> OUTCOME -> LIFE UPGRADES) ---
+        let currentStage = 'input';
+        const stageMeta = {
+            input: 'STEP 02: Log daily habits, distractions & focus goal',
+            outcome: 'STEP 03: Review your Focus Score, leaks & AI diagnosis',
+            upgrades: 'STEP 04: Apply actionable habit & schedule upgrades'
+        };
+
+        function switchStage(stageName) {
+            if (!['input', 'outcome', 'upgrades'].includes(stageName)) return;
+            currentStage = stageName;
+
+            ['input', 'outcome', 'upgrades'].forEach(name => {
+                const section = document.getElementById(`stage-${name}`);
+                const tab = document.getElementById(`stageTab-${name}`);
+                if (section) {
+                    section.classList.toggle('hidden', name !== stageName);
+                }
+                if (tab) {
+                    if (name === stageName) {
+                        tab.className = 'px-3 py-1.5 rounded-lg text-xs font-mono font-bold border border-white bg-white text-black transition shrink-0';
+                    } else {
+                        tab.className = 'px-3 py-1.5 rounded-lg text-xs font-mono border border-neutral-800 bg-black text-neutral-400 hover:text-white hover:border-neutral-600 transition shrink-0';
+                    }
+                }
+            });
+
+            const sub = document.getElementById('stageSubtitle');
+            if (sub) sub.textContent = stageMeta[stageName];
+
+            // Ensure Chart.js resizes cleanly when outcome section becomes visible
+            if (stageName === 'outcome' && radarChartInstance) {
+                setTimeout(() => radarChartInstance.resize(), 50);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- INTRO OVERLAY CONTROLS ---
+        function dismissIntro() {
+            const overlay = document.getElementById('nikeIntroOverlay');
+            if (!overlay) return;
+            overlay.classList.add('opacity-0', '-translate-y-6', 'pointer-events-none');
+            switchStage('input');
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+            }, 700);
+        }
+
+        function replayIntro() {
+            const overlay = document.getElementById('nikeIntroOverlay');
+            if (!overlay) return;
+            overlay.classList.remove('hidden', 'opacity-0', '-translate-y-6', 'pointer-events-none');
+            // Re-trigger word-by-word & kinetic intro animations
+            overlay.querySelectorAll('.nike-reveal-1, .nike-reveal-2, .nike-reveal-3, .nike-fade-up, .nike-divider, .word-seq, .word-converge-left, .word-converge-right, .word-converge-center').forEach(el => {
+                el.style.animation = 'none';
+                el.offsetHeight; // force reflow
+                el.style.animation = '';
+            });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') dismissIntro();
+        });
+
+        // --- 0. TWINKLING STARFIELD BACKGROUND ENGINE ---
+        function initStarfield() {
+            const canvas = document.getElementById('starfieldCanvas');
+            const ctx = canvas.getContext('2d');
+            let stars = [];
+            const numStars = 170;
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                createStars();
+            }
+
+            function createStars() {
+                stars = [];
+                for (let i = 0; i < numStars; i++) {
+                    stars.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        radius: Math.random() * 1.4 + 0.3,
+                        baseAlpha: Math.random() * 0.65 + 0.15,
+                        twinkleSpeed: Math.random() * 0.02 + 0.005,
+                        phase: Math.random() * Math.PI * 2,
+                        driftY: (Math.random() - 0.5) * 0.08
+                    });
+                }
+            }
+
+            function animateStars() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                for (let s of stars) {
+                    s.phase += s.twinkleSpeed;
+                    s.y += s.driftY;
+                    if (s.y < 0) s.y = canvas.height;
+                    if (s.y > canvas.height) s.y = 0;
+
+                    const alpha = Math.max(0.05, Math.min(1, s.baseAlpha + Math.sin(s.phase) * 0.35));
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${alpha.toFixed(3)})`;
+                    ctx.fill();
+
+                    // Subtle cross-glint on brighter stars
+                    if (s.radius > 1.35 && alpha > 0.7) {
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${(alpha * 0.45).toFixed(3)})`;
+                        ctx.lineWidth = 0.6;
+                        ctx.beginPath();
+                        ctx.moveTo(s.x - 4, s.y);
+                        ctx.lineTo(s.x + 4, s.y);
+                        ctx.moveTo(s.x, s.y - 4);
+                        ctx.lineTo(s.x, s.y + 4);
+                        ctx.stroke();
+                    }
+                }
+                requestAnimationFrame(animateStars);
+            }
+
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+            animateStars();
+        }
+
+        // --- 1. STATE & DOM REFERENCES ---
+        const inputs = {
+            deepWork: document.getElementById('deepWorkInput'),
+            distraction: document.getElementById('distractionInput'),
+            sleep: document.getElementById('sleepInput'),
+            exercise: document.getElementById('exerciseInput'),
+            switches: document.getElementById('switchesInput'),
+            goal: document.getElementById('goalInput')
+        };
+
+        const labels = {
+            deepWork: document.getElementById('deepWorkVal'),
+            distraction: document.getElementById('distractionVal'),
+            sleep: document.getElementById('sleepVal'),
+            exercise: document.getElementById('exerciseVal'),
+            switches: document.getElementById('switchesVal')
+        };
+
+        let radarChartInstance = null;
+        let completedActions = new Set();
+        let waterGlasses = 4;
+
+        // --- 2. INITIALIZE MONOCHROME RADAR CHART ---
+        function initRadarChart() {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Deep Work', 'Digital Discipline', 'Sleep Recovery', 'Physical Fitness', 'Low Distraction'],
+                    datasets: [
+                        {
+                            label: 'Your Day',
+                            data: [67, 55, 76, 50, 62],
+                            backgroundColor: 'rgba(255, 255, 255, 0.22)',
+                            borderColor: '#ffffff',
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#000000',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Optimal Target',
+                            data: [90, 90, 90, 85, 90],
+                            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                            borderColor: 'rgba(163, 163, 163, 0.5)',
+                            borderDash: [4, 4],
+                            pointRadius: 0,
+                            borderWidth: 1.5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 100,
+                            ticks: { display: false },
+                            grid: { color: 'rgba(255, 255, 255, 0.12)' },
+                            angleLines: { color: 'rgba(255, 255, 255, 0.12)' },
+                            pointLabels: {
+                                color: '#a3a3a3',
+                                font: { size: 10, family: 'Inter' }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#a3a3a3', boxWidth: 10, font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- 3. CALCULATE FOCUS SCORE & UPDATE VISUALS ---
+        function updateTelemetry() {
+            const dw = parseFloat(inputs.deepWork.value);
+            const dist = parseFloat(inputs.distraction.value);
+            const slp = parseFloat(inputs.sleep.value);
+            const ex = parseInt(inputs.exercise.value);
+            const sw = parseInt(inputs.switches.value);
+
+            // Update value badges
+            labels.deepWork.textContent = `${dw.toFixed(1)} hrs`;
+            labels.distraction.textContent = `${dist.toFixed(1)} hrs`;
+            labels.sleep.textContent = `${slp.toFixed(1)} hrs`;
+            labels.exercise.textContent = `${ex}m`;
+            labels.switches.textContent = `${sw}/day`;
+
+            // Normalized pillar scores (0 - 100)
+            const dwScore = Math.min(100, (dw / 6) * 100);
+            const distScore = Math.max(0, 100 - (dist / 6) * 100);
+            const slpScore = slp >= 7.5 && slp <= 9 ? 100 : Math.max(0, 100 - Math.abs(8 - slp) * 20);
+            const exScore = Math.min(100, (ex / 45) * 100);
+            const swScore = Math.max(0, 100 - ((sw - 10) / 90) * 100);
+
+            // Weighted Focus Score + Interactive Action Completion Bonus
+            const actionBonus = completedActions.size * 3;
+            const rawScore = (dwScore * 0.35) + (distScore * 0.25) + (slpScore * 0.20) + (exScore * 0.10) + (swScore * 0.10) + actionBonus;
+            const finalScore = Math.round(Math.max(5, Math.min(100, rawScore)));
+
+            // Update Gauge Number & SVG Ring (Monochrome Contrast)
+            document.getElementById('focusScoreNumber').textContent = finalScore;
+            const ring = document.getElementById('scoreRing');
+            const circumference = 314.16;
+            const offset = circumference - (finalScore / 100) * circumference;
+            ring.style.strokeDashoffset = offset;
+
+            const badge = document.getElementById('scoreBadge');
+            if (finalScore >= 80) {
+                ring.style.stroke = '#ffffff';
+                badge.textContent = 'Peak Focus';
+                badge.className = 'text-xs font-bold px-2.5 py-0.5 rounded-full bg-white text-black border border-white';
+            } else if (finalScore >= 55) {
+                ring.style.stroke = '#d4d4d4';
+                badge.textContent = 'Moderate';
+                badge.className = 'text-xs font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-white border border-neutral-600';
+            } else {
+                ring.style.stroke = '#737373';
+                badge.textContent = 'High Distraction';
+                badge.className = 'text-xs font-semibold px-2.5 py-0.5 rounded-full bg-neutral-900 text-neutral-400 border border-neutral-700';
+            }
+
+            // Identify Biggest Focus Leak
+            const leakEl = document.getElementById('primaryLeakText');
+            if (dist >= 3.0) {
+                leakEl.textContent = `Excessive Screen Distraction (${dist.toFixed(1)}h)`;
+                leakEl.className = 'text-sm font-semibold text-white mt-0.5';
+            } else if (slp < 6.5) {
+                leakEl.textContent = `Sleep Deficit (${slp.toFixed(1)}h logged)`;
+                leakEl.className = 'text-sm font-semibold text-neutral-200 mt-0.5';
+            } else if (sw > 55) {
+                leakEl.textContent = `Heavy Context Switching (${sw} switches/day)`;
+                leakEl.className = 'text-sm font-semibold text-neutral-200 mt-0.5';
+            } else if (dw < 3.0) {
+                leakEl.textContent = `Low Deep-Work Volume (${dw.toFixed(1)}h)`;
+                leakEl.className = 'text-sm font-semibold text-neutral-300 mt-0.5';
+            } else {
+                leakEl.textContent = 'No Major Leaks — Habits Well Balanced';
+                leakEl.className = 'text-sm font-semibold text-white mt-0.5';
+            }
+
+            // Update Radar Chart
+            if (radarChartInstance) {
+                radarChartInstance.data.datasets[0].data = [
+                    Math.round(dwScore),
+                    Math.round(distScore),
+                    Math.round(slpScore),
+                    Math.round(exScore),
+                    Math.round(swScore)
+                ];
+                radarChartInstance.update();
+            }
+
+            return { dw, dist, slp, ex, sw, finalScore };
+        }
+
+        // Attach live listeners to all sliders
+        Object.values(inputs).forEach(el => {
+            if (el.type === 'range') {
+                el.addEventListener('input', updateTelemetry);
+            }
+        });
+
+        // --- 4. DEMO PRESETS FOR HACKATHON PITCH ---
+        function loadPreset(type) {
+            if (type === 'distracted') {
+                inputs.deepWork.value = 1.5;
+                inputs.distraction.value = 5.5;
+                inputs.sleep.value = 5.0;
+                inputs.exercise.value = 0;
+                inputs.switches.value = 95;
+                inputs.goal.value = 'Finish hackathon project before submission deadline';
+                showToast('Loaded "Burnout Student" profile');
+            } else if (type === 'average') {
+                inputs.deepWork.value = 4.0;
+                inputs.distraction.value = 3.5;
+                inputs.sleep.value = 6.5;
+                inputs.exercise.value = 30;
+                inputs.switches.value = 45;
+                inputs.goal.value = 'Build hackathon MVP and prepare 3-minute pitch';
+                showToast('Loaded "Average Day" profile');
+            } else if (type === 'lockedIn') {
+                inputs.deepWork.value = 6.5;
+                inputs.distraction.value = 1.0;
+                inputs.sleep.value = 8.0;
+                inputs.exercise.value = 50;
+                inputs.switches.value = 15;
+                inputs.goal.value = 'Ship production code and win 1st place';
+                showToast('Loaded "Peak Focus" profile');
+            }
+            updateTelemetry();
+            runAICoach();
+        }
+
+        // --- 5. GEMINI AI COACHING ENGINE (WITH SMART FALLBACK) ---
+        async function runAICoach() {
+            const metrics = updateTelemetry();
+            const userGoal = inputs.goal.value.trim() || 'Stay focused and productive';
+
+            const loadingEl = document.getElementById('aiLoading');
+            const contentEl = document.getElementById('aiContent');
+            const statusEl = document.getElementById('aiStatusText');
+            const btnEl = document.getElementById('analyzeBtn');
+
+            // Move user straight into the Outcome interface to see live analysis
+            switchStage('outcome');
+
+            loadingEl.classList.remove('hidden');
+            contentEl.classList.add('opacity-40');
+            statusEl.textContent = 'Analyzing...';
+            btnEl.disabled = true;
+
+            const prompt = `You are AURA OS, an elite AI life and focus coach. Analyze this user's daily telemetry and provide hyper-specific, practical advice so they stay focused.
+User Goal: "${userGoal}"
+Metrics:
+- Deep Work: ${metrics.dw} hours
+- Social Media/Distractions: ${metrics.dist} hours
+- Sleep: ${metrics.slp} hours
+- Exercise: ${metrics.ex} minutes
+- App/Context Switches: ${metrics.sw} per day
+- Calculated Focus Score: ${metrics.finalScore}/100`;
+
+            const apiKey = ""; // Canvas runtime injects key automatically
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            diagnosis: { type: "STRING" },
+                            tips: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        tag: { type: "STRING" },
+                                        action: { type: "STRING" }
+                                    },
+                                    required: ["tag", "action"]
+                                }
+                            },
+                            schedule: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        time: { type: "STRING" },
+                                        block: { type: "STRING" }
+                                    },
+                                    required: ["time", "block"]
+                                }
+                            }
+                        },
+                        required: ["diagnosis", "tips", "schedule"]
+                    }
+                }
+            };
+
+            try {
+                const data = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!rawText) throw new Error('Empty AI response');
+
+                const parsed = JSON.parse(rawText);
+                renderAIAdvice(parsed);
+                statusEl.textContent = 'Updated via Gemini AI';
+            } catch (err) {
+                const fallback = generateLocalFallbackAdvice(metrics, userGoal);
+                renderAIAdvice(fallback);
+                statusEl.textContent = 'Telemetry Engine';
+            } finally {
+                loadingEl.classList.add('hidden');
+                contentEl.classList.remove('opacity-40');
+                btnEl.disabled = false;
+            }
+        }
+
+        // Exponential backoff helper
+        async function fetchWithRetry(url, options, retries = 2, delay = 1000) {
+            for (let i = 0; i <= retries; i++) {
+                try {
+                    const res = await fetch(url, options);
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    return await res.json();
+                } catch (e) {
+                    if (i === retries) throw e;
+                    await new Promise(r => setTimeout(r, delay * Math.pow(2, i)));
+                }
+            }
+        }
+
+        // Render structured coaching output into UI
+        function renderAIAdvice(advice) {
+            completedActions.clear();
+            updateCompletedBadge();
+            document.getElementById('aiDiagnosis').textContent = advice.diagnosis;
+
+            const tipsHtml = (advice.tips || []).slice(0, 3).map((t, idx) => `
+                <div onclick="toggleActionCard(this, ${idx})" class="cursor-pointer bg-black/75 hover:bg-neutral-900 border border-neutral-800 hover:border-white p-3.5 rounded-xl transition select-none group">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-mono font-bold text-white">0${idx + 1} / ${escapeHtml(t.tag.toUpperCase())}</span>
+                        <span class="check-circle w-4 h-4 rounded-full border border-neutral-600 flex items-center justify-center text-[10px] text-transparent group-hover:border-white transition">✓</span>
+                    </div>
+                    <p class="tip-text text-xs text-neutral-300 mt-1.5 leading-relaxed">${escapeHtml(t.action)}</p>
+                </div>
+            `).join('');
+            document.getElementById('aiTipsList').innerHTML = tipsHtml;
+
+            const schedHtml = (advice.schedule || []).slice(0, 3).map((s, idx) => `
+                <div onclick="loadScheduleBlock('${escapeHtml(s.block).replace(/'/g, "\\'")}', 25)" class="cursor-pointer hover:bg-neutral-900 px-2 py-1.5 rounded-lg flex justify-between ${idx < 2 ? 'border-b border-neutral-800/80' : ''} transition">
+                    <span class="${idx === 1 ? 'text-neutral-400' : 'text-white'} font-semibold">${escapeHtml(s.time)}</span>
+                    <span class="text-right ml-2">${escapeHtml(s.block)} →</span>
+                </div>
+            `).join('');
+            document.getElementById('aiSchedule').innerHTML = schedHtml;
+        }
+
+        // --- INTERACTIVE ACTION CARDS & SCHEDULE BLOCKS ---
+        function toggleActionCard(cardEl, idx) {
+            const circle = cardEl.querySelector('.check-circle');
+            const text = cardEl.querySelector('.tip-text');
+            if (completedActions.has(idx)) {
+                completedActions.delete(idx);
+                cardEl.classList.remove('border-white', 'bg-neutral-900');
+                circle.classList.remove('bg-white', 'border-white', 'text-black');
+                circle.classList.add('border-neutral-600', 'text-transparent');
+                text.classList.remove('line-through', 'text-neutral-500');
+            } else {
+                completedActions.add(idx);
+                cardEl.classList.add('border-white', 'bg-neutral-900');
+                circle.classList.remove('border-neutral-600', 'text-transparent');
+                circle.classList.add('bg-white', 'border-white', 'text-black');
+                text.classList.add('line-through', 'text-neutral-500');
+                appendActivityLog('Completed AI habit fix (+3 Focus Bonus)', '+Habit', 'text-white');
+                showToast('Habit completed! +3 Focus Bonus applied');
+            }
+            updateCompletedBadge();
+            updateTelemetry();
+        }
+
+        function updateCompletedBadge() {
+            const count = completedActions.size;
+            document.getElementById('completedTasksBadge').textContent = `${count}/3 Completed (+${count * 3} Bonus Pts)`;
+        }
+
+        function loadScheduleBlock(blockTitle, mins) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerSeconds = mins * 60;
+            updateTimerDisplay();
+            const btn = document.getElementById('timerToggleBtn');
+            btn.textContent = 'Start Block';
+            btn.className = 'px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold transition';
+            appendActivityLog(`Queued schedule block: ${blockTitle.slice(0, 28)}`, 'Timer', 'text-white');
+            showToast(`Loaded "${blockTitle}" (${mins}m) into Focus Timer`);
+        }
+
+        // --- INTERACTIVE 1-CLICK QUICK EVENT LOGGER & FEED ---
+        function logQuickEvent(type) {
+            if (type === 'sprint') {
+                inputs.deepWork.value = Math.min(12, parseFloat(inputs.deepWork.value) + 0.5);
+                appendActivityLog('Logged +30m Deep Work sprint', '+Focus', 'text-white');
+                showToast('+30m Deep Work logged!');
+            } else if (type === 'scroll') {
+                inputs.distraction.value = Math.min(10, parseFloat(inputs.distraction.value) + 0.5);
+                inputs.switches.value = Math.min(120, parseInt(inputs.switches.value) + 5);
+                appendActivityLog('Logged +30m social media scroll', '-Focus', 'text-neutral-400');
+                showToast('+30m Distraction logged — Focus Score adjusted');
+            } else if (type === 'water') {
+                waterGlasses = Math.min(12, waterGlasses + 1);
+                document.getElementById('hydrationCount').textContent = `◈ ${waterGlasses}/8 glasses`;
+                inputs.exercise.value = Math.min(120, parseInt(inputs.exercise.value) + 5);
+                appendActivityLog(`Hydration logged (${waterGlasses}/8 glasses)`, '+Energy', 'text-white');
+                showToast(`Hydration logged (${waterGlasses}/8 glasses)`);
+            } else if (type === 'switch') {
+                inputs.switches.value = Math.min(120, parseInt(inputs.switches.value) + 5);
+                appendActivityLog('Recorded +5 app/tab context switches', '-Flow', 'text-neutral-400');
+                showToast('+5 App Switches recorded');
+            }
+            updateTelemetry();
+        }
+
+        function appendActivityLog(msg, tag, colorClass) {
+            const list = document.getElementById('activityFeedList');
+            const now = new Date();
+            const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            const li = document.createElement('li');
+            li.className = 'text-neutral-200 flex justify-between animate-pulse';
+            li.innerHTML = `<span>[${timeStr}] ${escapeHtml(msg)}</span><span class="${colorClass}">${escapeHtml(tag)}</span>`;
+            list.prepend(li);
+            setTimeout(() => li.classList.remove('animate-pulse'), 1000);
+        }
+
+        // --- AUTOMATIC TAB-SWITCH DETECTOR DURING ACTIVE FOCUS ---
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && timerInterval !== null) {
+                inputs.switches.value = Math.min(120, parseInt(inputs.switches.value) + 1);
+                updateTelemetry();
+                appendActivityLog('Auto-detected tab switch during focus sprint!', '+1 Switch', 'text-neutral-400');
+            }
+        });
+
+        // Deterministic fallback generator if API is unreachable during live demo
+        function generateLocalFallbackAdvice(m, goal) {
+            if (m.finalScore < 55) {
+                return {
+                    diagnosis: `Critical focus leak detected: ${m.dist}h of screen distractions and ${m.sw} daily app switches are starving your goal ("${goal}"). With only ${m.slp}h of sleep, your prefrontal cortex is running on high fatigue.`,
+                    tips: [
+                        { tag: 'DETOX', action: 'Put your phone in another room for the next 2 hours to stop reactive scrolling.' },
+                        { tag: 'SPRINT', action: 'Commit to one 45-minute single-tab work block right now before checking any messages.' },
+                        { tag: 'SLEEP', action: 'Set a hard 11:00 PM shutdown alarm tonight to recover at least 7.5 hours of sleep.' }
+                    ],
+                    schedule: [
+                        { time: 'Next 45m', block: `Emergency Sprint: ${goal.slice(0, 32)}` },
+                        { time: '22:30 – 23:00', block: 'Zero-Screen Wind Down & Hydration' },
+                        { time: '08:00 – 10:00', block: 'Morning Deep Work (Before Checking Socials)' }
+                    ]
+                };
+            } else if (m.finalScore >= 80) {
+                return {
+                    diagnosis: `Elite behavioral alignment (${m.finalScore}/100). Your ${m.dw}h of deep work paired with ${m.slp}h of sleep creates strong cognitive momentum toward "${goal}".`,
+                    tips: [
+                        { tag: 'PROTECT', action: 'Guard your morning 2-hour block from meetings or notifications to sustain peak flow.' },
+                        { tag: 'PACE', action: 'Take a 10-minute screen-free walk every 90 minutes to prevent late-day mental burnout.' },
+                        { tag: 'REVIEW', action: 'Write down your #1 priority before sleeping so you start tomorrow with zero friction.' }
+                    ],
+                    schedule: [
+                        { time: '08:30 – 11:00', block: `Peak Output Block: ${goal.slice(0, 30)}` },
+                        { time: '13:00 – 14:30', block: 'Collaborative Tasks & Reviews' },
+                        { time: '16:30 – 17:30', block: 'Physical Fitness & Daily Wrap-Up' }
+                    ]
+                };
+            }
+            return {
+                diagnosis: `You logged ${m.dw}h of productive work, but ${m.dist}h of distractions and ${m.sw} context switches are capping your potential on "${goal}". Tightening your digital boundaries will push your score past 85.`,
+                tips: [
+                    { tag: 'LOCK', action: 'Block social apps during your first 90-minute work session tomorrow morning.' },
+                    { tag: 'BATCH', action: 'Group notifications into two 15-minute windows instead of switching tabs all day.' },
+                    { tag: 'RECOVER', action: 'Aim for 7.5+ hours of sleep and 30 minutes of movement to boost afternoon stamina.' }
+                ],
+                schedule: [
+                    { time: '09:00 – 10:30', block: `Deep Focus Block: ${goal.slice(0, 30)}` },
+                    { time: '11:00 – 12:30', block: 'Secondary Execution & Problem Solving' },
+                    { time: '15:00 – 16:30', block: 'Final Polish & Tomorrow Planning' }
+                ]
+            };
+        }
+
+        // --- 6. LIVE FOCUS SESSION TIMER ---
+        let timerSeconds = 25 * 60;
+        let timerInterval = null;
+
+        function toggleTimer() {
+            const btn = document.getElementById('timerToggleBtn');
+            const pulse = document.getElementById('timerPulse');
+
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                btn.textContent = 'Resume Focus';
+                btn.className = 'px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold transition';
+                pulse.className = 'w-3 h-3 rounded-full bg-neutral-400';
+            } else {
+                btn.textContent = 'Pause';
+                btn.className = 'px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-600 text-xs font-bold transition';
+                pulse.className = 'w-3 h-3 rounded-full bg-white animate-ping';
+
+                timerInterval = setInterval(() => {
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                        inputs.deepWork.value = Math.min(12, parseFloat(inputs.deepWork.value) + 0.5);
+                        updateTelemetry();
+                        showToast('Focus Sprint Complete! +0.5h added to Deep Work.');
+                        resetTimer();
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerSeconds = 25 * 60;
+            updateTimerDisplay();
+            const btn = document.getElementById('timerToggleBtn');
+            btn.textContent = 'Start Focus';
+            btn.className = 'px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold transition';
+            document.getElementById('timerPulse').className = 'w-3 h-3 rounded-full bg-neutral-600';
+        }
+
+        function updateTimerDisplay() {
+            const mins = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+            const secs = String(timerSeconds % 60).padStart(2, '0');
+            document.getElementById('timerDisplay').textContent = `${mins}:${secs}`;
+        }
+
+        // --- 7. UTILITIES ---
+        function showToast(msg) {
+            const banner = document.getElementById('toastBanner');
+            document.getElementById('toastMessage').textContent = msg;
+            banner.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                banner.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            initStarfield();
+            initRadarChart();
+            updateTelemetry();
+        };
+    </script>
+</body>
+</html>
